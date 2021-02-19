@@ -16,5 +16,9 @@
     "node-dht-sensor": "^0.4.3",
     "node-schedule": "^2.0.0",
     "pigpio": "^3.3.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/emper911/garden_scheduler.git"
   }
 }
