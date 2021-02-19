@@ -19,4 +19,3 @@ setTimeout(() => {
     power_control(false);
     console.log('false');
 }, 10000);
-

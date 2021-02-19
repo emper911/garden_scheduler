@@ -8,3 +8,4 @@ export const input_component_mapper = (component) => {
       return { type: null, component: null };
   }
 };
+

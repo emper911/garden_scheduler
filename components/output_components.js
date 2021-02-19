@@ -10,7 +10,7 @@ export class DHT {
     this.last_read_date = new Date();
   }
 
-  get_data = () => {
+  _get_data = () => {
     return stringDeepCopy(this._data);
   }
 
@@ -18,16 +18,16 @@ export class DHT {
     this._data = data;
   }
 
-  read_data = (err, temperature, humidity) => {
+  _read_data_sensor = (err, temperature, humidity) => {
     if (err) throw err;
     this._set_data({ temperature, humidity });
   }
 
-  get_data_from_sensor = () => {
+  get_sensor_data = () => {
     const current_time = new Date();
     if (current_time - this.last_read_date > this.update_interval_ms) {
-      sensor.read(this.version, this.data_pin, this.read_data);
+      sensor.read(this.version, this.data_pin, this._read_data_sensor);
     }
-    return this.get_data();
+    return this._get_data();
   }
 }

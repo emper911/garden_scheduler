@@ -5,3 +5,4 @@ sensor.read(11, 4, function(err, temperature, humidity) {
     console.log(`temp: ${temperature}°C, humidity: ${humidity}%`);
   }
 });
+

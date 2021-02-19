@@ -15,3 +15,4 @@ if result.is_valid():
     print("Humidity: %-3.1f %%" % result.humidity)
 else:
     print("Error: %d" % result.error_code)
+

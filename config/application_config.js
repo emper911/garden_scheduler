@@ -1,10 +1,11 @@
 const config = {
-  "server": {
-    "port": 3000
+  server: {
+    port: 3000
   },
-  "gpio_config": {
-    "input": [
+  gpio_config: {
+    input: [
       { 
+        id: "dht-1",
         type: "dht",
         config: {
           data_pin: 4,
@@ -13,8 +14,9 @@ const config = {
         }
       }
     ],
-    "output": [
+    output: [
       {
+        id: "light-1",
         type: "light",
         config: {
           power_pin: 17

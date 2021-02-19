@@ -2,7 +2,8 @@ import express from 'express';
 import schedule from 'node-schedule';
 import config from './config/application_config.js';
 import { logger } from './utils/express_helpers.js';
-import { input_component_mapper, output_component_mapper } from './utils/helpers.js';
+import { input_component_mapper } from './utils/input_component_mapper';
+import { output_component_mapper } from './utils/output_component_mapper';
 
 const { server, gpio_config } = config;
 const INPUT_COMPONENT_MAPPING = gpio_config.output.map(input_component_mapper);
@@ -14,17 +15,7 @@ app.use(express.static('public'));
 const port = server.port;
 
 const ACTIVE_JOBS = [];
-const STATE = {
-  sensors: {
-    temperature: 0,
-    humidity: 0,
-  },
-  scheduled: [],
-  lightStatus: false,
-  startDate: start_time_stamp,
-  modifiedDate: new Date(),
-}
-
+const SCHEDULE = [];
 
 app.get('/', (req, res) => {
   res.send('Hello World!')
@@ -55,8 +46,11 @@ app.get('/state', async (req, res) => {
 
 
 app.get('/sensors', async (req, res) => {
-  update_dht_sensor();
-  res.send(STATE.sensors);
+  const { type = '' } = req.body;
+  const sensor_data = INPUT_COMPONENT_MAPPING
+    .filter(sensor => sensor.type === type)
+    .map(sensor => ({ id: sensor.id, type, data: sensor.get_sensor_data() }));
+  res.send(sensor_data);
 });
 
 // {hour: 14, minute: 30, dayOfWeek: 0}
