@@ -1,4 +1,5 @@
 export const stringDeepCopy = (obj) => {
-  return JSON.parse(JSON.stringify(obj));
+  if (obj !== undefined) return JSON.parse(JSON.stringify(obj));
+  else return undefined;
 };
 

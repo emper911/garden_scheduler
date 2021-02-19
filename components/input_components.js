@@ -1,27 +1,34 @@
-import { Gpio } from 'pigpio';
+import sensor from 'node-dht-sensor';
+import { stringDeepCopy } from '../utils/helpers';
 
 
-export class Light {
-  constructor(light_config) {
-    this.power_pin = light_config.power_pin;
-    this.power_gpio = new Gpio(this.power_pin, { mode: Gpio.OUTPUT });
-    this.power_control = this.power_control.bind(this);
+export class DHT {
+  constructor(config) {
+    this.version = config.version;
+    this.data_pin = config.data_pin;
+    this.update_interval_ms = config.update_interval_ms;
+    this._data = { temperature: null, humidity: null };
+    this.last_read_date = new Date();
   }
 
-  power_control = (power) => {
-    const write_number = power ? 1 : 0;
-    this.power_gpio.digitalWrite(power);
-  }
-}
-
-export class Pump {
-  constructor(id, pin=9) {
-    this.gpio_1 = new Gpio(pin, { mode: Gpio.OUTPUT });
-    this.power_control = this.power_control.bind(this);
+  _get_data = () => {
+    return stringDeepCopy(this._data);
   }
 
-  power_switch = (power) => {
-    const write_number = power ? 1 : 0;
-    this.gpio_1.digitalWrite(power);
+  _set_data = (data) => {
+    this._data = data;
+  }
+
+  _read_data_sensor = (err, temperature, humidity) => {
+    if (err) throw err;
+    this._set_data({ temperature, humidity });
+  }
+
+  get_sensor_data = () => {
+    const current_time = new Date();
+    if (current_time - this.last_read_date > this.update_interval_ms) {
+      sensor.read(this.version, this.data_pin, this._read_data_sensor);
+    }
+    return this._get_data();
   }
 }

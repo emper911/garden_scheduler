@@ -1,33 +1,54 @@
-import sensor from 'node-dht-sensor';
+import { Gpio } from 'pigpio';
 import { stringDeepCopy } from '../utils/helpers';
 
-export class DHT {
-  constructor(config) {
-    this.version = config.version;
-    this.data_pin = config.data_pin;
-    this.update_interval_ms = config.update_interval_ms;
-    this._data = { temperature: null, humidity: null };
-    this.last_read_date = new Date();
+
+export class Light {
+  constructor(light_config) {
+    this.power_pin = light_config.power_pin;
+    this.power_gpio = new Gpio(this.power_pin, { mode: Gpio.OUTPUT });
+    this._data = { power: false };
+    this.power_control = this.power_control.bind(this);
+    this.get_data = this.get_data.bind(this);
+    this._set_data = this._set_data.bind(this);
   }
 
-  _get_data = () => {
-    return stringDeepCopy(this._data);
+  get_data = (id = '') => {
+    if (id) return stringDeepCopy(this._data[id]);
+    else return stringDeepCopy(this._data);
   }
 
-  _set_data = (data) => {
-    this._data = data;
+  _set_data = (id, value) => {
+    this._data[id] = value;
   }
 
-  _read_data_sensor = (err, temperature, humidity) => {
-    if (err) throw err;
-    this._set_data({ temperature, humidity });
+  power_control = (power) => {
+    const write_number = power ? 1 : 0;
+    this.power_gpio.digitalWrite(power);
+    this._set_data('power', power);
+  }
+}
+
+export class Pump {
+  constructor(id, pin=9) {
+    this.gpio_1 = new Gpio(pin, { mode: Gpio.OUTPUT });
+    this._data = { power: false };
+    this.power_control = this.power_control.bind(this);
+    this.get_data = this.get_data.bind(this);
+    this._set_data = this._set_data.bind(this);
   }
 
-  get_sensor_data = () => {
-    const current_time = new Date();
-    if (current_time - this.last_read_date > this.update_interval_ms) {
-      sensor.read(this.version, this.data_pin, this._read_data_sensor);
-    }
-    return this._get_data();
+  get_data = (id = '') => {
+    if (id) return stringDeepCopy(this._data[id]);
+    else return stringDeepCopy(this._data);
+  }
+
+  _set_data = (id, value) => {
+    this._data[id] = value;
+  }
+
+  power_control = (power) => {
+    const write_number = power ? 1 : 0;
+    this.gpio_1.digitalWrite(power);
+    this._set_data('power', power);
   }
 }
