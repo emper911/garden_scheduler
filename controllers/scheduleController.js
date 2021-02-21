@@ -14,7 +14,6 @@ const getJobInfo = (id) => {
   if (existingJob) return { id, sched: existingJob.sched };
   else return null;
 };
-
 // will have to account for non power type actions
 const createJob = (sched, component) => {
   const returnJob = {};
@@ -23,11 +22,9 @@ const createJob = (sched, component) => {
   returnJob.sched = sched;
   setJob(returnJob);
 };
-
 const rescheduleJob = (sched, job) => {
   job.setTime(new CronTime(sched.time));
 };
-
 const cancelJob = (id, job) => {
   job.stop();
   removeJob(id);
@@ -83,7 +80,8 @@ export const scheduleOne = (req, res) => {
   const { schedule } = req.body;
   try {
     const component = OUTPUT_COMPONENT_MAPPING.find(comp => comp.id === schedule.id)?.component;
-    cronJobManager(schedule, component);
+    if (component !== undefined) cronJobManager(schedule, component);
+    else res.status(400).send({ message: 'Cannot find component' });
   } catch (err) {
     res.status(500).send({'message': err});
   }
@@ -94,7 +92,8 @@ export const scheduleMany = (req, res) => {
   try {
     scheduleArray.map((sched) => {
       const component = OUTPUT_COMPONENT_MAPPING.find(comp => comp.id === sched.id)?.component;
-      cronJobManager(sched, component);
+      if (component !== undefined) cronJobManager(sched, component);
+      else res.status(400).send({ message: 'Cannot find component' });
     });
   } catch (err) {
     res.status(500).send({'message': err});

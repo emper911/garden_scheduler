@@ -47,7 +47,7 @@ app.get('/sensors', async (req, res) => {
 });
 
 // {hour: 14, minute: 30, dayOfWeek: 0}
-// [ { id, time, action, timezone }]
+// [ { id, jobId, time, type, schedAction, action, timezone }]
 app.get('/schedule/one', ScheduleController.getOne);
 app.get('/schedule/many', ScheduleController.getMany);
 app.get('/schedule/all', ScheduleController.getAll);
