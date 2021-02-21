@@ -1,8 +1,8 @@
 import express from 'express';
 import config from './config/application_config.js';
 import { logger } from './utils/express_helpers.js';
-import { input_component_mapper } from './utils/input_component_mapper';
-import * as ScheduleController from './controllers/scheduleController';
+import { input_component_mapper } from './utils/input_component_mapper.js';
+import * as ScheduleController from './controllers/scheduleController.js';
 
 const { server, gpio_config } = config;
 const INPUT_COMPONENT_MAPPING = gpio_config.input.map(input_component_mapper);

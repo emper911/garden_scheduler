@@ -1,6 +1,6 @@
 import { CronJob, CronTime } from 'cron';
-import config from '../config/application_config';
-import { output_component_mapper } from '../utils/output_component_mapper';
+import config from '../config/application_config.js';
+import { output_component_mapper } from '../utils/output_component_mapper.js';
 
 const { gpio_config } = config;
 const OUTPUT_COMPONENT_MAPPING = gpio_config.output.map(output_component_mapper);
@@ -55,7 +55,7 @@ export const getOne = (req, res) => {
   else res.status.send({ message: 'Cannot find job info'});
 };
 
-export const getMany = (req, res) => {
+export const getMany = async (req, res) => {
   const { jobIdArray = [] } = req.body;
   try {
     const activeJobInfoPromise = jobIdArray.map(async id => getJobInfo(id));

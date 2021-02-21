@@ -1,4 +1,4 @@
-import { DHT } from '../components/input_components';
+import { DHT } from '../components/input_components.js';
 
 export const input_component_mapper = (component) => {
   switch (component.type) {

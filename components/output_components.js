@@ -1,5 +1,5 @@
 import { Gpio } from 'pigpio';
-import { stringDeepCopy } from '../utils/helpers';
+import { stringDeepCopy } from '../utils/helpers.js';
 
 
 export class Light {

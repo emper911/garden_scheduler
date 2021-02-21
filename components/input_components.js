@@ -1,5 +1,5 @@
 import sensor from 'node-dht-sensor';
-import { stringDeepCopy } from '../utils/helpers';
+import { stringDeepCopy } from '../utils/helpers.js';
 
 
 export class DHT {
