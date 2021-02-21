@@ -11,10 +11,10 @@
   "author": "midiNeutron",
   "license": "ISC",
   "dependencies": {
+    "cron": "^1.8.2",
     "express": "^4.17.1",
     "jest": "^26.6.3",
     "node-dht-sensor": "^0.4.3",
-    "node-schedule": "^2.0.0",
     "pigpio": "^3.3.0"
   },
   "repository": {
