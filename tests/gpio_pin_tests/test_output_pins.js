@@ -1,8 +1,8 @@
 import { Gpio } from 'pigpio';
-import config from '../config/application_config.js';
+import config from '../../config/application_config.js';
 
 const { gpio_config } = config;
-const LIGHT_PIN = gpio_config.output.lights;
+const LIGHT_PIN = gpio_config.output[0].config.power_pin;
 
 const gpio_lights = new Gpio(LIGHT_PIN, { mode: Gpio.OUTPUT });
 
