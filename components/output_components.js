@@ -46,7 +46,7 @@ export class Pump {
     this._data[id] = value;
   }
 
-  power_control = (power) => {
+  power_control = (power = false) => {
     const write_number = power ? 1 : 0;
     this.gpio_1.digitalWrite(power);
     this._set_data('power', power);

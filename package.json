@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "test": "jest",
-    "start": "node index.js"
+    "start": "sudo node index.js"
   },
   "author": "midiNeutron",
   "license": "ISC",

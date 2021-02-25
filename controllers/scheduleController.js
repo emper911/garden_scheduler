@@ -7,13 +7,17 @@ const OUTPUT_COMPONENT_MAPPING = gpio_config.output.map(output_component_mapper)
 let ACTIVE_JOBS = [];
 
 const getJob = (id) => id ? ACTIVE_JOBS.find(j => j.id === id) : null;
+
 const setJob = (job) => ACTIVE_JOBS.push(job);
+
 const removeJob = (id) => ACTIVE_JOBS = ACTIVE_JOBS.filter(j => j.id !== id);
+
 const getJobInfo = (id) => {
   const existingJob = getJob(id);
   if (existingJob) return { id, sched: existingJob.sched };
   else return null;
 };
+
 // will have to account for non power type actions
 const createJob = (sched, component) => {
   const returnJob = {};
@@ -22,9 +26,11 @@ const createJob = (sched, component) => {
   returnJob.sched = sched;
   setJob(returnJob);
 };
+
 const rescheduleJob = (sched, job) => {
   job.setTime(new CronTime(sched.time));
 };
+
 const cancelJob = (id, job) => {
   job.stop();
   removeJob(id);
@@ -48,7 +54,7 @@ const cronJobManager = (sched, component) => {
 }
 
 export const getOne = (req, res) => {
-  const { jobId = '' } = req.params;
+  const { jobId = '' } = req.query;
   if (!jobId) res.status(400).send({ message: 'Cannot find job' });
   const existingJobInfo = getJobInfo(jobId);
   if (existingJobInfo) res.send(existingJobInfo);

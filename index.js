@@ -7,7 +7,7 @@ import * as ScheduleController from './controllers/scheduleController.js';
 const { server, gpio_config } = config;
 const INPUT_COMPONENT_MAPPING = gpio_config.input.map(input_component_mapper);
 
-const app = express()
+const app = express();
 app.use(logger);
 app.use(express.static('public'));
 const port = server.port;
@@ -39,11 +39,19 @@ app.listen(port, () => {
 // });
 
 app.get('/sensors', async (req, res) => {
-  const { type = '' } = req.body;
-  const sensor_data = INPUT_COMPONENT_MAPPING
-    .filter(sensor => sensor.type === type)
-    .map(sensor => ({ id: sensor.id, type, data: sensor.get_sensor_data() }));
-  res.send(sensor_data);
+  const { type = '' } = req.query;
+  try {
+    const sensor_data_promises = INPUT_COMPONENT_MAPPING
+      .filter(sensor => sensor.type === type)
+      .map(async sensor => {
+        const data = { id: sensor.id, type, data: await sensor.component.get_sensor_data() };
+        return data;
+      });
+    const sensor_data = await Promise.all(sensor_data_promises);
+    res.send(sensor_data);
+  } catch (err) {
+    console.log(err);
+  }
 });
 
 // {hour: 14, minute: 30, dayOfWeek: 0}
