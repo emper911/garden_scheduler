@@ -1,13 +1,21 @@
 import express from 'express';
+import bodyParser from 'body-parser';
 import config from './config/application_config.js';
 import { logger } from './utils/express_helpers.js';
 import { input_component_mapper } from './utils/input_component_mapper.js';
 import * as ScheduleController from './controllers/scheduleController.js';
 
+
 const { server, gpio_config } = config;
 const INPUT_COMPONENT_MAPPING = gpio_config.input.map(input_component_mapper);
 
+
 const app = express();
+
+// parse application/x-www-form-urlencoded
+app.use(bodyParser.urlencoded({ extended: false })) 
+// parse application/json
+app.use(bodyParser.json())
 app.use(logger);
 app.use(express.static('public'));
 const port = server.port;

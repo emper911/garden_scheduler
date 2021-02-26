@@ -21,36 +21,41 @@ const getJobInfo = (id) => {
 // will have to account for non power type actions
 const createJob = (sched, component) => {
   const returnJob = {};
-  returnJob.id = `${sched.type}-${new Date().getUTCDate()}`;
+  returnJob.id = `${sched.type}-${new Date().toISOString()}`;
   returnJob.job = new CronJob(sched.time, component.power_control.bind(null, true), component.power_control.bind(null, false), sched.timezone);
   returnJob.sched = sched;
   setJob(returnJob);
+  return { jobId: returnJob.id, sched: returnJob.sched };
 };
 
 const rescheduleJob = (sched, job) => {
   job.setTime(new CronTime(sched.time));
+  return { id: sched.jobId, sched };
 };
 
-const cancelJob = (id, job) => {
+const stopJob = (id, job) => {
   job.stop();
   removeJob(id);
+  return id;
 }
 
 const cronJobManager = (sched, component) => {
   const schedJobId = sched.jobId;
   const existingJob = schedJobId !== undefined ? getJob(schedJobId) : null;
+  let returnJob = null;
   switch (sched.schedAction) {
-    case 'CREATE':
-      createJob(sched, component);
+    case 'START':
+      returnJob = createJob(sched, component);
     case 'RESCHEDULE':
-      if (existingJob) rescheduleJob(sched, existingJob);
+      if (existingJob) returnJob = rescheduleJob(sched, existingJob);
       break;
-    case 'CANCEL':
-      if (existingJob) cancelJob(schedJobId, existingJob);
+    case 'STOP':
+      if (existingJob) returnJob = stopJob(schedJobId, existingJob);
       break;
     default:
       break;
   }
+  return returnJob;
 }
 
 export const getOne = (req, res) => {
@@ -83,14 +88,18 @@ export const getAll = async (req, res) => {
 }
 
 export const scheduleOne = (req, res) => {
-  const { schedule } = req.body;
+  const { schedule = null } = req.body;
+  let returnJob = null;
   try {
-    const component = OUTPUT_COMPONENT_MAPPING.find(comp => comp.id === schedule.id)?.component;
-    if (component !== undefined) cronJobManager(schedule, component);
+    if (!schedule) throw new Error('Cannot read schedule');
+    const component = OUTPUT_COMPONENT_MAPPING.find(comp => comp.id === schedule.id).component;
+    if (component !== undefined) returnJob = cronJobManager(schedule, component);
     else res.status(400).send({ message: 'Cannot find component' });
   } catch (err) {
+    console.log(err);
     res.status(500).send({'message': err});
   }
+  res.send(returnJob);
 }
 
 export const scheduleMany = (req, res) => {
