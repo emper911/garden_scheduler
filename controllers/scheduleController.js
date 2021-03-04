@@ -6,15 +6,15 @@ const { gpio_config } = config;
 const OUTPUT_COMPONENT_MAPPING = gpio_config.output.map(output_component_mapper);
 let ACTIVE_JOBS = [];
 
-const getJob = (id) => id ? ACTIVE_JOBS.find(j => j.id === id) : null;
+const getJob = (jobId) => jobId ? ACTIVE_JOBS.find(j => j.id === jobId) : null;
 
 const setJob = (job) => ACTIVE_JOBS.push(job);
 
-const removeJob = (id) => ACTIVE_JOBS = ACTIVE_JOBS.filter(j => j.id !== id);
+const removeJob = (jobId) => ACTIVE_JOBS = ACTIVE_JOBS.filter(j => j.id !== jobId);
 
-const getJobInfo = (id) => {
-  const existingJob = getJob(id);
-  if (existingJob) return { id, sched: existingJob.sched };
+const getJobInfo = (jobId) => {
+  const existingJob = getJob(jobId);
+  if (existingJob) return { jobId, sched: existingJob.sched };
   else return null;
 };
 
@@ -22,36 +22,36 @@ const getJobInfo = (id) => {
 const createJob = (sched, component) => {
   const returnJob = {};
   returnJob.id = `${sched.type}-${new Date().toISOString()}`;
-  returnJob.job = new CronJob(sched.time, component.power_control.bind(null, true), component.power_control.bind(null, false), sched.timezone);
+  returnJob.job = new CronJob(sched.time, () => component.power_control(), () => component.power_control(false), sched.timezone);
+  returnJob.job.start();
   returnJob.sched = sched;
   setJob(returnJob);
   return { jobId: returnJob.id, sched: returnJob.sched };
 };
 
-const rescheduleJob = (sched, job) => {
-  job.setTime(new CronTime(sched.time));
-  return { id: sched.jobId, sched };
+const rescheduleJob = (jobId, sched, job) => {
+  existingJob.job.setTime(new CronTime(sched.time));
+  return { jobId, sched };
 };
 
-const stopJob = (id, job) => {
-  job.stop();
-  removeJob(id);
-  return id;
+const stopJob = (jobId, existingJob) => {
+  existingJob.job.stop();
+  removeJob(jobId);
+  return jobId;
 }
 
-const cronJobManager = (sched, component) => {
-  const schedJobId = sched.jobId;
-  const existingJob = schedJobId !== undefined ? getJob(schedJobId) : null;
+const cronJobManager = (jobId, sched, component) => {
+  const existingJob = jobId ? getJob(jobId) : null;
   let returnJob = null;
   switch (sched.schedAction) {
     case 'START':
       returnJob = createJob(sched, component);
     case 'RESCHEDULE':
-      if (existingJob) returnJob = rescheduleJob(sched, existingJob);
+      if (existingJob) returnJob = rescheduleJob(jobId, sched, existingJob);
       break;
     case 'STOP':
-      if (existingJob) returnJob = stopJob(schedJobId, existingJob);
-      break;
+      if (existingJob) returnJob = stopJob(jobId, existingJob);
+      break
     default:
       break;
   }
@@ -88,12 +88,12 @@ export const getAll = async (req, res) => {
 }
 
 export const scheduleOne = (req, res) => {
-  const { schedule = null } = req.body;
+  const { schedule = null, jobId = '' } = req.body;
   let returnJob = null;
   try {
     if (!schedule) throw new Error('Cannot read schedule');
     const component = OUTPUT_COMPONENT_MAPPING.find(comp => comp.id === schedule.id).component;
-    if (component !== undefined) returnJob = cronJobManager(schedule, component);
+    if (component !== undefined) returnJob = cronJobManager(jobId, schedule, component);
     else res.status(400).send({ message: 'Cannot find component' });
   } catch (err) {
     console.log(err);
@@ -106,8 +106,9 @@ export const scheduleMany = (req, res) => {
   const { scheduleArray = [] } = req.body;
   try {
     scheduleArray.map((sched) => {
+      const jobId = sched.jobId !== undefined ? sched.jobId : '';
       const component = OUTPUT_COMPONENT_MAPPING.find(comp => comp.id === sched.id)?.component;
-      if (component !== undefined) cronJobManager(sched, component);
+      if (component !== undefined) cronJobManager(jobId, sched, component);
       else res.status(400).send({ message: 'Cannot find component' });
     });
   } catch (err) {

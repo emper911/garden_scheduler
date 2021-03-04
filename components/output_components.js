@@ -21,10 +21,11 @@ export class Light {
     this._data[id] = value;
   }
 
-  power_control = (power) => {
-    const write_number = power ? 1 : 0;
-    this.power_gpio.digitalWrite(power);
-    this._set_data('power', power);
+  power_control = (power = null) => {
+    const powerState =  power === null ? !this.get_data('power') : power;
+    const writeNumber = powerState ? 1 : 0;
+    this.power_gpio.digitalWrite(writeNumber);
+    this._set_data('power', powerState);
   }
 }
 
