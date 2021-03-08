@@ -8,7 +8,8 @@ const state = {
       type: 'dht',
       data: { humidity: null, temperature: null }
     },
-  ]
+  ],
+  modifiedDate: new Date().toISOString(),
 }
 
 const removeChildrenFromNode = (node) => {
@@ -23,7 +24,7 @@ const updateSensorLabel = () => {
   const newElement = state.sensors.map(sensor => {
     const newTag = document.createElement('p');
     const { data, type, id } = sensor;
-    newTag.innerText = `id: ${id}\ntype: ${type}\nhumdity: ${data.humidity}%\ntemperature: ${data.temperature}˚C\n`;
+    newTag.innerText = `id: ${id}\ntype: ${type}\nhumdity: ${data.humidity}%\ntemperature: ${data.temperature}˚C\nmodified date: ${state.modifiedDate}`;
     sensorDataDiv.appendChild(newTag);
   })
 };
@@ -37,6 +38,7 @@ const getDHTData = async () => {
     });
 
     state.sensors = await response.json();
+    state.modifiedDate = new Date().toLocaleString();
     console.log(`Data: ${JSON.stringify(state.sensors)}`);
   } catch (err) {
     console.log(err);
@@ -44,7 +46,9 @@ const getDHTData = async () => {
   }
 };
 
-const pollServer = (pollingInterval) => {
+const pollServer = async (pollingInterval) => {
+  await getDHTData();
+  updateSensorLabel();
   setInterval(async () => {
     await getDHTData();
     updateSensorLabel();
