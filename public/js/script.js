@@ -1,5 +1,5 @@
 const HOST = "http://192.168.1.200:3000"
-const POLLING_INTERVAL = 5000;
+const POLLING_INTERVAL = 3000;
 
 const state = {
   sensors: [

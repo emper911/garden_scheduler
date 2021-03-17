@@ -1,33 +1,29 @@
 import express from 'express';
-import bodyParser from 'body-parser';
 import config from './config/application_config.js';
 import { logger } from './utils/express_helpers.js';
 import { input_component_mapper } from './utils/input_component_mapper.js';
 import * as ScheduleController from './controllers/scheduleController.js';
 
-
 const { server, gpio_config } = config;
 const INPUT_COMPONENT_MAPPING = gpio_config.input.map(input_component_mapper);
 
-
 const app = express();
-
 // parse application/x-www-form-urlencoded
-app.use(bodyParser.urlencoded({ extended: false })) 
+app.use(express.urlencoded()) 
 // parse application/json
-app.use(bodyParser.json())
+app.use(express.json())
 app.use(logger);
 app.use(express.static('public'));
+
 const port = server.port;
-
-app.get('/', (req, res) => {
-  res.send('Hello World!')
-});
-
 app.listen(port, () => {
   console.log(`Hydro Controller  listening at http://localhost:${port}`)
 });
 
+
+app.get('/', (req, res) => {
+  res.send('Hello World!')
+});
 
 // app.get('/state', async (req, res) => {
 //   res.setHeader('Cache-Control', 'no-cache');
@@ -62,8 +58,16 @@ app.get('/sensors', async (req, res) => {
   }
 });
 
-// {hour: 14, minute: 30, dayOfWeek: 0}
-// [ { id, jobId, time, type, schedAction, action, timezone }]
+// {
+//   "schedule": {
+//       "id": "light-1",
+//       "time": "*/8 * * * * *",
+//       "type": "light",
+//       "schedAction": "STOP",
+//       "timezone": "america/new_york"
+//   },
+//   "jobId": "light-2021-03-04T04:59:33.449Z"
+// }
 app.get('/schedule/one', ScheduleController.getOne);
 app.get('/schedule/many', ScheduleController.getMany);
 app.get('/schedule/all', ScheduleController.getAll);

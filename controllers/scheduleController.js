@@ -63,7 +63,7 @@ export const getOne = (req, res) => {
   if (!jobId) res.status(400).send({ message: 'Cannot find job' });
   const existingJobInfo = getJobInfo(jobId);
   if (existingJobInfo) res.send(existingJobInfo);
-  else res.status.send({ message: 'Cannot find job info'});
+  else res.status.send({ message: 'Cannot find job info' });
 };
 
 export const getMany = async (req, res) => {
@@ -79,7 +79,7 @@ export const getMany = async (req, res) => {
 
 export const getAll = async (req, res) => {
   try {
-    const activeJobInfoPromise = ACTIVE_JOBS.map(async j => ({ id: j.id, sched: j.sched}));
+    const activeJobInfoPromise = ACTIVE_JOBS.map(async j => ({ id: j.id, sched: j.sched }));
     const activeJobInfo = await Promise.all(activeJobInfoPromise);
     res.send(activeJobInfo);
   } catch (err) {
@@ -97,21 +97,24 @@ export const scheduleOne = (req, res) => {
     else res.status(400).send({ message: 'Cannot find component' });
   } catch (err) {
     console.log(err);
-    res.status(500).send({'message': err});
+    res.status(500).send({ 'message': err });
   }
   res.send(returnJob);
 }
 
 export const scheduleMany = (req, res) => {
   const { scheduleArray = [] } = req.body;
+  let returnJobArray = null;
   try {
-    scheduleArray.map((sched) => {
-      const jobId = sched.jobId !== undefined ? sched.jobId : '';
-      const component = OUTPUT_COMPONENT_MAPPING.find(comp => comp.id === sched.id)?.component;
-      if (component !== undefined) cronJobManager(jobId, sched, component);
-      else res.status(400).send({ message: 'Cannot find component' });
+    returnJobArray = scheduleArray.map((item) => {
+      const { jobId = '', schedule = null } = item;
+      if (!schedule) res.status(400).send({ message: 'No Schedule object provided!' });
+      const component = OUTPUT_COMPONENT_MAPPING.find(comp => comp.id === schedule.id) ? .component;
+      if (component === undefined) res.status(400).send({ message: 'Cannot find component' });
+      return cronJobManager(jobId, schedule, component);
     });
   } catch (err) {
-    res.status(500).send({'message': err});
+    res.status(500).send({ 'message': err });
   }
+  res.send(returnJobArray);
 };
